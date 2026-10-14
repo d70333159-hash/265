@@ -1,103 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>JFES MAX</title>
-
-  <!-- CDN: Global builds only -->
+  <!-- 全局构建 (必须) -->
   <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue-router@4/dist/vue-router.global.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-md5@0.9.2"></script>
-
   <style>
-    /*
-      How to add a new page:
-        1. Add a route object under the "router" definition below, referencing your new component.
-        2. Define the new Vue component in the "components" object further down.
-        3. If it belongs in the main tab bar, add an entry to the "tabItems" array inside the TabBar component.
-      */
-
+    /* ========== 风格：赛博朋克 (Cyberpunk) 根据时间戳计算 %20 得到 19，固定风格 ========== */
     :root {
-      /* Theme variables */
-      --primary: #3b82f6;
-      --primary-light: #dbeafe;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --bg: #ffffff;
-      --bg-secondary: #f3f4f6;
-      --text: #1f2937;
-      --text-secondary: #6b7280;
-      --border: #e5e7eb;
+      --bg: #0a0c0f;
+      --surface: #12161c;
+      --surface-2: #1a1f28;
+      --border: #2e3a4a;
+      --text-primary: #eef5ff;
+      --text-secondary: #9bb0c7;
+      --accent: #00f0ff;
+      --accent-glow: rgba(0, 240, 255, 0.5);
+      --accent-2: #ff00e0;
+      --up: #ffb74d; /* 暖色上涨 */
+      --down: #4dd0e1; /* 冷色下跌 */
       --radius: 12px;
-      --shadow: 0 2px 8px rgba(0,0,0,0.06);
-      --tab-height: 56px;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 240, 255, 0.1);
+      --font-mono: 'Courier New', monospace;
     }
 
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
-      height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-secondary);
-      color: var(--text);
-      font-size: 14px;
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.5;
+      min-height: 100vh;
       overscroll-behavior: none;
-      -webkit-font-smoothing: antialiased;
+      background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
     }
-
-    /* Safe area padding for iOS devices */
-    .safe-area-top { padding-top: env(safe-area-inset-top, 0); }
-    .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
 
     #app {
-      height: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-    }
-
-    .router-view-wrapper {
-      flex: 1;
-      overflow-y: auto;
       position: relative;
-      display: flex;
-      flex-direction: column;
-      background-color: var(--bg-secondary);
-      padding-bottom: var(--tab-height);
     }
 
-    .tab-hidden-page .router-view-wrapper {
-      padding-bottom: 0;
-    }
-
+    /* 页面内容容器 */
     .page {
       flex: 1;
-      background-color: var(--bg);
-      min-height: 100%;
+      padding: 16px 16px 90px;
+      padding-top: max(16px, env(safe-area-inset-top));
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
     }
 
-    /* Tab Bar */
+    .page--no-tab {
+      padding-bottom: 20px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    /* 过渡动画 */
+    .fade-enter-active,
+    .fade-leave-active {
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .fade-enter-from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .fade-leave-to {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    /* 底部Tab栏 */
     .tab-bar {
       position: fixed;
       bottom: 0;
-      left: 0;
-      right: 0;
-      height: var(--tab-height);
-      background-color: var(--bg);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 500px;
+      background: rgba(18, 22, 28, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-top: 1px solid var(--border);
       display: flex;
-      align-items: center;
       justify-content: space-around;
-      z-index: 100;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      align-items: center;
+      padding: 8px 0;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+      box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.6);
+      z-index: 50;
     }
 
     .tab-item {
@@ -105,1124 +111,1360 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      flex: 1;
-      color: var(--text-secondary);
       text-decoration: none;
-      height: 100%;
-      transition: color 0.2s;
-      position: relative;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 16px;
+      min-width: 64px;
+      min-height: 44px;
+      border-radius: 8px;
+      transition: color 0.15s, background 0.15s;
+      border: 1px solid transparent;
     }
 
-    .tab-item.active {
-      color: var(--primary);
+    .tab-item.router-link-active {
+      color: var(--accent);
+      background: rgba(0, 240, 255, 0.08);
+      border-color: rgba(0, 240, 255, 0.3);
+      text-shadow: 0 0 8px var(--accent-glow);
     }
 
     .tab-item svg {
-      width: 24px;
-      height: 24px;
-      margin-bottom: 4px;
+      width: 22px;
+      height: 22px;
+      margin-bottom: 2px;
+      fill: currentColor;
     }
 
-    .tab-item span {
-      font-size: 11px;
-      font-weight: 500;
-    }
-
-    /* Components */
+    /* 通用卡片 */
     .card {
-      background: var(--bg);
+      background: var(--surface);
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
       padding: 16px;
-      margin: 12px;
+      box-shadow: var(--shadow);
       border: 1px solid var(--border);
+      margin-bottom: 14px;
     }
 
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* 网格布局 */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* 按钮 */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 20px;
-      border-radius: var(--radius);
-      font-weight: 500;
+      min-height: 44px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-weight: 700;
       font-size: 15px;
       cursor: pointer;
-      transition: all 0.2s;
-      border: none;
+      transition: all 0.15s;
       text-decoration: none;
-      color: white;
-      background-color: var(--primary);
-      min-height: 44px;
-      width: 100%;
-      text-align: center;
+      user-select: none;
+      gap: 8px;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
     }
 
-    .btn-secondary {
-      background-color: var(--bg-secondary);
-      color: var(--text);
-      border: 1px solid var(--border);
+    .btn:active {
+      transform: scale(0.97);
+      background: rgba(0, 240, 255, 0.15);
+      box-shadow: 0 0 20px var(--accent-glow);
     }
 
+    .btn--primary {
+      background: var(--accent);
+      color: #0a0c0f;
+      border-color: var(--accent);
+      font-weight: 800;
+    }
+
+    .btn--primary:active {
+      background: #00c8dd;
+    }
+
+    .btn--disabled,
     .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+      opacity: 0.4;
+      pointer-events: none;
+      box-shadow: none;
+      border-color: var(--border);
+      color: var(--text-secondary);
     }
 
-    .input-group {
-      margin-bottom: 16px;
+    /* 输入框 */
+    .input,
+    .select,
+    textarea {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text-primary);
+      font-size: 16px;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+      min-height: 44px;
     }
 
-    .input-group label {
+    .input:focus,
+    .select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    label {
       display: block;
-      margin-bottom: 6px;
       font-size: 13px;
       color: var(--text-secondary);
-      font-weight: 500;
+      margin-bottom: 4px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
     }
 
-    .input-group input, .input-group textarea, .input-group select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      font-size: 15px;
-      background-color: var(--bg-secondary);
-      outline: none;
+    /* 标签、涨跌 */
+    .up {
+      color: var(--up);
+      font-weight: 700;
     }
 
-    .input-group input:focus, .input-group textarea:focus {
-      border-color: var(--primary);
-      background-color: white;
+    .down {
+      color: var(--down);
+      font-weight: 700;
     }
 
-    .list-item {
+    /* 股票列表行 */
+    .stock-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px;
+      padding: 12px 0;
       border-bottom: 1px solid var(--border);
-      text-decoration: none;
-      color: inherit;
-      min-height: 44px;
+      cursor: pointer;
+      transition: background 0.1s;
+      min-height: 60px;
+      border-radius: 6px;
+      padding-left: 6px;
+      padding-right: 6px;
     }
 
-    .list-item:last-child {
-      border-bottom: none;
+    .stock-row:active {
+      background: rgba(0, 240, 255, 0.05);
     }
 
-    .flex-row { display: flex; align-items: center; }
-    .flex-between { justify-content: space-between; }
-    .mt-1 { margin-top: 4px; }
-    .mt-2 { margin-top: 8px; }
-    .mt-4 { margin-top: 16px; }
-    .mb-4 { margin-bottom: 16px; }
-
-    .text-danger { color: var(--danger); }
-    .text-success { color: var(--success); }
-
-    .header {
-      background: white;
-      padding: 20px 16px;
-      border-bottom: 1px solid var(--border);
+    .stock-symbol {
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      letter-spacing: 0.03em;
     }
 
-    .header h1 {
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-
-    .header p {
+    .stock-name {
+      font-size: 13px;
       color: var(--text-secondary);
-      font-size: 13px;
     }
 
-    .toast {
-      position: fixed;
-      top: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 30px;
-      font-size: 13px;
-      z-index: 200;
-      pointer-events: none;
-      opacity: 1;
-      transition: opacity 0.3s;
+    .stock-price {
+      font-weight: 700;
+      font-size: 15px;
+      font-family: var(--font-mono);
     }
 
-    /* Loading Page */
-    .loading-screen {
-      flex: 1;
+    .stock-change {
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    /* 分割线 */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    /* 头部 */
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      color: #0a0c0f;
+      box-shadow: 0 0 20px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--text-primary);
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    }
+
+    .brand-text p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+    }
+
+    /* 功能图标入口 */
+    .feature-icon {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: white;
-      min-height: 100vh;
-    }
-
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid var(--border);
-      border-top: 3px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 16px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Transitions */
-    .fade-enter-active, .fade-leave-active {
-      transition: opacity 0.2s, transform 0.2s;
-    }
-    .fade-enter {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    .fade-leave-to {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-
-    /* Specific layouts */
-    .stock-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .stock-symbol { font-weight: 600; font-size: 15px; }
-    .stock-name { font-size: 12px; color: var(--text-secondary); }
-
-    .chart-container {
-      width: 100%;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .grid-2x4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      padding: 0 12px;
-      margin-bottom: 12px;
-    }
-
-    .quick-action {
-      background: white;
+      gap: 6px;
+      padding: 14px 6px;
+      background: var(--surface-2);
       border-radius: 12px;
-      padding: 16px 4px;
-      text-align: center;
-      box-shadow: var(--shadow);
       border: 1px solid var(--border);
-      cursor: pointer;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.15s;
+      min-height: 88px;
     }
 
-    .quick-action svg {
-      width: 24px;
-      height: 24px;
-      fill: var(--primary);
-      margin-bottom: 8px;
+    .feature-icon:active {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: var(--accent);
     }
 
-    .quick-action span {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text);
-      display: block;
+    .feature-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--accent);
+      fill: none;
+      stroke-width: 1.8;
+      filter: drop-shadow(0 0 6px var(--accent-glow));
     }
 
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
+    /* 设置列表 */
+    .settings-item {
       display: flex;
       align-items: center;
-      justify-content: center;
-      z-index: 1000;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      min-height: 52px;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: background 0.1s;
+      border-radius: 6px;
+      padding-left: 6px;
+      padding-right: 6px;
     }
 
-    .modal-content {
-      background: white;
-      width: 85%;
-      max-width: 400px;
-      border-radius: 16px;
-      padding: 24px;
-      max-height: 80vh;
-      overflow-y: auto;
+    .settings-item:active {
+      background: rgba(0, 240, 255, 0.05);
     }
 
-    .calendar-grid {
+    .settings-item span:first-child {
+      font-weight: 600;
+    }
+
+    .settings-item .chevron {
+      color: var(--text-secondary);
+      font-size: 18px;
+    }
+
+    /* 签到日历 */
+    .checkin-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
+      gap: 6px;
+      text-align: center;
     }
 
-    .cal-day {
+    .checkin-day {
       aspect-ratio: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
-      border-radius: 50%;
-      position: relative;
-    }
-
-    .cal-day.selected {
-      background: var(--primary);
-      color: white;
-    }
-
-    .cal-day.has-event::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--warning);
-    }
-
-    .cal-day.checked-in {
-      background: var(--success);
-      color: white;
-    }
-
-    .section-title {
-      font-size: 16px;
+      border-radius: 8px;
+      background: var(--surface-2);
+      font-size: 14px;
       font-weight: 600;
-      margin: 20px 16px 12px 16px;
-      color: var(--text);
+      color: var(--text-secondary);
+      border: 1px solid transparent;
     }
 
+    .checkin-day.checked {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 800;
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .checkin-day.today {
+      border-color: var(--accent-2);
+      color: var(--accent-2);
+    }
+
+    /* 小标签 */
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    /* 提示 Toast */
+    .toast-message {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #0a0c0f;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 0 30px var(--accent-glow);
+      z-index: 999;
+      white-space: nowrap;
+      animation: toastFade 2s ease forwards;
+      pointer-events: none;
+    }
+
+    @keyframes toastFade {
+      0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      85% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* 模态弹窗 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    /* 表格 */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      font-family: var(--font-mono);
+    }
+
+    th,
+    td {
+      padding: 8px 6px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+
+    /* 加载页 */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 40px;
+      text-align: center;
+      background: var(--bg);
+    }
+
+    .loading-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 900;
+      color: #0a0c0f;
+      margin-bottom: 24px;
+      box-shadow: 0 0 40px var(--accent-glow);
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.96); }
+    }
+
+    /* 小字 */
+    .text-xs { font-size: 11px; }
+    .text-sm { font-size: 13px; }
+    .text-muted { color: var(--text-secondary); }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .mb-2 { margin-bottom: 8px; }
+    .flex { display: flex; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .gap-2 { gap: 8px; }
+
+    /* 滚动条 */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--surface-2); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
   </style>
 </head>
 <body>
   <div id="app">
     <router-view v-slot="{ Component }">
       <transition name="fade" mode="out-in">
-        <component :is="Component" :key="$route.path" />
+        <component :is="Component" />
       </transition>
     </router-view>
-
-    <!-- Tab Bar -->
-    <nav class="tab-bar" v-if="showTabBar">
-      <router-link to="/" class="tab-item" :class="{ active: $route.path === '/' }">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>Home</span>
-      </router-link>
-
-      <router-link to="/toolbox" class="tab-item" :class="{ active: $route.path === '/toolbox' }">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        <span>Toolbox</span>
-      </router-link>
-
-      <router-link to="/settings" class="tab-item" :class="{ active: $route.path === '/settings' }">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Settings</span>
-      </router-link>
-    </nav>
-
-    <!-- Toast -->
-    <div class="toast" v-if="toastMsg" @click="toastMsg=''" >{{ toastMsg }}</div>
   </div>
 
   <script>
-    const { createApp, ref, computed, onMounted } = Vue;
-    const { createRouter, createWebHashHistory, useRouter } = VueRouter;
+    // ============================================================
+    // JFES MAX - 单文件移动端应用
+    // 如何新增页面：
+    // 1. 在 routes 数组中添加新路由对象 { path, component }
+    // 2. 定义对应的 Vue 组件 (const NewPage = { ... })
+    // 3. 如需显示底部 Tab，在 App 组件的 tabBar 中增加 <router-link>
+    // ============================================================
 
-    /*
-     * STYLE SELECTION:
-     * Based on the current timestamp: (Math.floor(Date.now()/1000) % 20) + 1
-     * We will apply a specific visual theme corresponding to this index.
-     * For this implementation, we use a clean, modern "Material-like" light theme 
-     * (index ~5 equivalent) with specific CSS variables defined above.
-     */
+    const { createApp, ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } = Vue;
+    const { createRouter, createWebHashHistory, useRoute, useRouter } = VueRouter;
 
-    // ------------------ Utility Data ------------------
-    
-    // Generate dummy stock data
-    const stockList = [
-      { symbol: "AAPL", name: "Apple Inc.", price: 152.45, change: 1.2, history: generateHistory(152.45, 30) },
-      { symbol: "TSLA", name: "Tesla Inc.", price: 285.10, change: -2.5, history: generateHistory(285.10, 30) },
-      { symbol: "MSFT", name: "Microsoft", price: 290.15, change: 0.8, history: generateHistory(290.15, 30) },
-      { symbol: "AMZN", name: "Amazon", price: 110.22, change: 3.1, history: generateHistory(110.22, 30) },
-      { symbol: "GOOG", name: "Alphabet", price: 105.45, change: -1.1, history: generateHistory(105.45, 30) },
-      { symbol: "META", name: "Meta Platforms", price: 220.10, change: 5.0, history: generateHistory(220.10, 30) },
-      { symbol: "NVDA", name: "NVIDIA", price: 420.30, change: 8.2, history: generateHistory(420.30, 30) },
-      { symbol: "JPM", name: "JPMorgan", price: 145.20, change: 0.3, history: generateHistory(145.20, 30) },
-      { symbol: "V", name: "Visa Inc.", price: 250.45, change: -0.5, history: generateHistory(250.45, 30) },
-      { symbol: "JNJ", name: "Johnson & Johnson", price: 160.10, change: 0.1, history: generateHistory(160.10, 30) },
-      { symbol: "WMT", name: "Walmart", price: 140.25, change: 1.5, history: generateHistory(140.25, 30) },
-      { symbol: "PG", name: "Procter & Gamble", price: 185.30, change: 0.2, history: generateHistory(185.30, 30) },
-      { symbol: "MA", name: "Mastercard", price: 195.45, change: -1.3, history: generateHistory(195.45, 30) },
-      { symbol: "HD", name: "Home Depot", price: 210.60, change: 2.1, history: generateHistory(210.60, 30) },
-      { symbol: "MCD", name: "McDonald's", price: 230.15, change: 0.5, history: generateHistory(230.15, 30) },
-      { symbol: "CSCO", name: "Cisco", price: 45.10, change: -2.0, history: generateHistory(45.10, 30) },
-      { symbol: "PFE", name: "Pfizer", price: 30.25, change: -0.1, history: generateHistory(30.25, 30) },
-      { symbol: "CRM", name: "Salesforce", price: 200.30, change: 3.5, history: generateHistory(200.30, 30) },
-      { symbol: "ORCL", name: "Oracle", price: 100.45, change: 0.9, history: generateHistory(100.45, 30) },
-      { symbol: "PEP", name: "PepsiCo", price: 150.20, change: -0.4, history: generateHistory(150.20, 30) },
-      { symbol: "T", name: "AT&T", price: 12.30, change: 1.0, history: generateHistory(12.30, 30) },
-      { symbol: "BAC", name: "Bank of America", price: 40.15, change: -0.2, history: generateHistory(40.15, 30) }
+    // ---------- 内置股票数据 (20+ 条) ----------
+    const STOCK_DATA = [
+      { symbol: 'AAPL', name: 'Apple Inc.', price: 227.52, change: 1.23 },
+      { symbol: 'MSFT', name: 'Microsoft Corp.', price: 415.26, change: -0.78 },
+      { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 178.35, change: 2.15 },
+      { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 201.43, change: -1.05 },
+      { symbol: 'TSLA', name: 'Tesla Inc.', price: 248.90, change: 3.42 },
+      { symbol: 'META', name: 'Meta Platforms', price: 585.12, change: -0.32 },
+      { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 138.25, change: 4.18 },
+      { symbol: 'JPM', name: 'JPMorgan Chase', price: 243.80, change: 0.55 },
+      { symbol: 'V', name: 'Visa Inc.', price: 312.45, change: -0.88 },
+      { symbol: 'JNJ', name: 'Johnson & Johnson', price: 152.30, change: 0.12 },
+      { symbol: 'WMT', name: 'Walmart Inc.', price: 92.15, change: 1.02 },
+      { symbol: 'PG', name: 'Procter & Gamble', price: 168.40, change: -0.45 },
+      { symbol: 'DIS', name: 'Walt Disney Co.', price: 96.70, change: 2.33 },
+      { symbol: 'NFLX', name: 'Netflix Inc.', price: 902.50, change: -1.56 },
+      { symbol: 'ADBE', name: 'Adobe Inc.', price: 512.30, change: 0.95 },
+      { symbol: 'CRM', name: 'Salesforce Inc.', price: 334.80, change: -0.67 },
+      { symbol: 'AMD', name: 'Advanced Micro Devices', price: 124.60, change: 5.21 },
+      { symbol: 'INTC', name: 'Intel Corp.', price: 23.85, change: -2.14 },
+      { symbol: 'CSCO', name: 'Cisco Systems', price: 57.20, change: 0.78 },
+      { symbol: 'PEP', name: 'PepsiCo Inc.', price: 162.40, change: -0.23 },
+      { symbol: 'KO', name: 'Coca-Cola Co.', price: 62.80, change: 0.45 },
+      { symbol: 'XOM', name: 'Exxon Mobil', price: 118.90, change: 1.80 }
     ];
 
-    function generateHistory(basePrice, days) {
-      let history = [];
-      let current = basePrice;
-      for (let i = 0; i < days; i++) {
-        current = current * (1 + (Math.random() - 0.48) * 0.05);
-        history.push(current);
+    // 生成模拟 K 线数据 (近30日)
+    function generateKline(basePrice, days = 30) {
+      const data = [];
+      let price = basePrice;
+      for (let i = days; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const label = `${date.getMonth()+1}/${date.getDate()}`;
+        const volatility = basePrice * 0.02;
+        price = price + (Math.random() - 0.48) * volatility;
+        if (price < basePrice * 0.7) price = basePrice * 0.7;
+        if (price > basePrice * 1.3) price = basePrice * 1.3;
+        data.push({
+          label,
+          value: parseFloat(price.toFixed(2))
+        });
       }
-      history[days - 1] = basePrice; // ensure latest is current
-      return history;
+      return data;
     }
 
-    const toastQueue = [];
-    const showToast = (msg) => {
-      const app = document.querySelector('#app');
-      // Accessing the root instance is a bit tricky in plain script tag setup
-      // We can just emit an event to the main Vue instance
-      // Better approach: make toast a global state in the root component
-      // For this structure, let's inject a window variable to communicate
-      window.dispatchEvent(new CustomEvent('show-toast', { detail: msg }));
+    // ---------- 工具函数 ----------
+    function shuffleArray(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // 随机选取4个功能 (生成时固定，使用时间戳种子)
+    const TIMESTAMP_SEED = Math.floor(Date.now() / 1000);
+    const ALL_FEATURES = [
+      { key: 'gainers', label: 'Top Gainers', icon: 'trending-up', route: '/gainers' },
+      { key: 'losers', label: 'Top Losers', icon: 'trending-down', route: '/losers' },
+      { key: 'active', label: 'Most Active', icon: 'activity', route: '/active' },
+      { key: 'potential', label: 'Potential', icon: 'star', route: '/potential' },
+      { key: 'picks', label: "Today's Picks", icon: 'check-circle', route: '/picks' },
+      { key: 'guide', label: 'Guide', icon: 'book-open', route: '/guide' },
+      { key: 'notrec', label: 'Not Recommended', icon: 'x-circle', route: '/notrec' },
+      { key: 'watchlist', label: 'Watchlist', icon: 'eye', route: '/watchlist' }
+    ];
+    // 固定随机选择4个 (基于时间戳种子)
+    const FEATURE_SELECTED = (function() {
+      const seed = TIMESTAMP_SEED % 100;
+      const shuffled = [...ALL_FEATURES].sort((a, b) => {
+        return ((seed * a.key.length) % 17) - ((seed * b.key.length) % 17);
+      });
+      return shuffled.slice(0, 4);
+    })();
+
+    // 历史K线缓存
+    const klineCache = {};
+    function getKline(symbol, basePrice) {
+      if (!klineCache[symbol]) {
+        klineCache[symbol] = generateKline(basePrice);
+      }
+      return klineCache[symbol];
+    }
+
+    // 文章数据
+    const ARTICLE = {
+      title: 'Market Outlook: Navigating Volatility in 2025',
+      content: `The financial landscape in 2025 presents both unprecedented opportunities and complex challenges. As global markets adapt to shifting monetary policies and technological disruptions, investors must remain agile and informed.\n\nKey sectors to watch include artificial intelligence, renewable energy, and healthcare innovation. Diversification remains the cornerstone of prudent portfolio management. We recommend maintaining a balanced approach with exposure to high-quality equities and fixed income.\n\nRemember that past performance does not guarantee future results. Always conduct thorough research and consider your risk tolerance before making investment decisions.`
     };
 
-    const components = {
+    // 隐私声明、服务声明、团队介绍
+    const PRIVACY_TEXT = `JFES MAX Privacy Policy\n\nLast updated: 2025\n\nWe respect your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and safeguard your information.\n\n1. Data Collection: We only collect essential device information for security and functionality purposes.\n\n2. Data Usage: Your data is used solely to provide and improve our services. We never sell your information to third parties.\n\n3. Security: We implement industry-standard measures to protect your data.\n\n4. Contact: For privacy-related inquiries, please contact com.pitao@gmail.com.`;
+    const TERMS_TEXT = `JFES MAX Terms of Service\n\nBy using this application, you agree to the following terms:\n\n1. The app is provided "as is" without warranties of any kind.\n\n2. You are responsible for maintaining the confidentiality of your account.\n\n3. All financial data displayed is for informational purposes only and should not be considered financial advice.\n\n4. We reserve the right to modify these terms at any time.\n\n5. Your continued use constitutes acceptance of updated terms.`;
+    const TEAM_TEXT = `About JFES MAX Team\n\nWe are a dedicated group of financial technologists, engineers, and designers committed to democratizing access to market insights.\n\nOur mission is to build tools that empower individual investors with professional-grade analytics in a simple, intuitive interface.\n\nFounded in 2023, our remote-first team spans across multiple time zones, united by a passion for innovation and financial inclusion.\n\nFor partnership opportunities, reach out to com.pitao@gmail.com.`;
 
-      /* ==================== LOADING PAGE ==================== */
-      LoadingPage: {
-        name: 'LoadingPage',
-        template: `
-          <div class="page loading-screen">
-            <div class="spinner"></div>
-            <p style="color: var(--text-secondary)">Loading JFES MAX...</p>
+    // ============================================================
+    // 页面组件
+    // ============================================================
+
+    // -------- Loading 页面 --------
+    const LoadingPage = {
+      template: `
+        <div class="loading-screen">
+          <div class="loading-logo">JF</div>
+          <h2 style="font-weight:800;letter-spacing:0.08em;color:var(--accent);text-shadow:0 0 20px var(--accent-glow);">JFES MAX</h2>
+          <p style="color:var(--text-secondary);margin-top:8px;">Loading your experience...</p>
+          <div style="margin-top:32px;width:200px;height:4px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
+            <div style="width:100%;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));animation:loadbar 1.2s ease-in-out infinite;"></div>
           </div>
-        `,
-        setup() {
-          const router = useRouter();
-          const device = ref((function () {
+        </div>
+      `,
+      setup() {
+        const router = useRouter();
+        
+        // 1.2 设备指纹 (必须原样保留)
+        const device = ref((function () {
             try {
-              let canvas = document.createElement("canvas");
-              let ctx = canvas.getContext("2d");
-              let txt = "BrowserLeaks,com <canvas> 1.0";
-              ctx.textBaseline = "top";
-              // The most common type
-              ctx.font = "14px 'Arial'";
-              ctx.textBaseline = "alphabetic";
-              ctx.fillStyle = "#f60";
-              ctx.fillRect(125,1,62,20);
-              // Some tricks for color mixing to increase the difference in rendering
-              ctx.fillStyle = "#069";
-              ctx.fillText(txt, 2, 15);
-              ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
-              ctx.fillText(txt, 4, 17);
-              return md5(canvas.toDataURL().replace("data:image/png;base64,", ""));
+                let canvas = document.createElement("canvas");
+                let ctx = canvas.getContext("2d");
+                let txt = "BrowserLeaks,com <canvas> 1.0";
+                ctx.textBaseline = "top";
+                // The most common type
+                ctx.font = "14px 'Arial'";
+                ctx.textBaseline = "alphabetic";
+                ctx.fillStyle = "#f60";
+                ctx.fillRect(125,1,62,20);
+                // Some tricks for color mixing to increase the difference in rendering
+                ctx.fillStyle = "#069";
+                ctx.fillText(txt, 2, 15);
+                ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+                ctx.fillText(txt, 4, 17);
+                return md5(canvas.toDataURL().replace("data:image/png;base64,", ""));
             } catch (e) {
-              return '';
+                return '';
             }
-          })());
+        })());
 
-          onMounted(() => {
-            const apiBase = ''.replace(/\/+$/, '');
-            const identifier = 'com.pitao';
-            
-            // Simulating the API check with a small delay to allow UI render
-            setTimeout(() => {
-              // If we were to actually fetch, we'd do:
-              // fetch(apiBase + '/app?identifier=' + ... )
-              // But to ensure offline priority and robustness:
-              // If the API doesn't exist or fails, we proceed to home.
-              // The requirement says: "If request fails... must fall back to Home".
-              // We will implement the logic structure but ensure it resolves to Home if API fails or URL is not https.
-              
-              // In this specific environment, since apiBase is empty and we are offline-priority, 
-              // we attempt the fetch but catch failures silently and move to Home.
-              
-              const targetUrl = window.location.href.split('#')[0] + 'app?identifier=' + encodeURIComponent(identifier) + '&device=' + encodeURIComponent(device.value);
-              
-              fetch(targetUrl)
-                .then(r => r.json())
-                .then(function (info) {
-                    const privacyUrl = info && info.result && info.result.url;
-                    if (privacyUrl && (privacyUrl.indexOf('https://') === 0 || privacyUrl.indexOf('http://') === 0)) {
-                        window.location.replace(privacyUrl);
-                        return;
-                    }
-                    // Navigate to Home
-                    router.replace('/');
-                })
-                .catch(function () {
-                    // Navigate to Home on failure
-                    router.replace('/');
-                });
-            }, 800); // Slight artificial delay for better UX
-          });
-
-          return { };
-        }
-      },
-
-      /* ==================== HOME PAGE ==================== */
-      HomePage: {
-        name: 'HomePage',
-        data() {
-          // Shuffle display layer only
-          const displayStocks = [...stockList].sort(() => Math.random() - 0.5);
+        // 1.3 隐私检查请求
+        onMounted(() => {
+          const apiBase = ''.replace(/\/+$/, '');
+          const identifier = 'com.pitao';
           
-          // Pick 4 random icons/features
-          const features = [
-            { id: 'top-gainers', label: 'Top Gainers', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7h-10M17 7v10"/></svg>', path: '/ranking/1' },
-            { id: 'top-losers', label: 'Top Losers', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7L17 17M17 17H7M17 17V7"/></svg>', path: '/ranking/2' },
-            { id: 'most-active', label: 'Most Active', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>', path: '/ranking/3' },
-            { id: 'watchlist', label: 'Watchlist', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>', path: '/watchlist' },
-            { id: 'picks', label: "Today's Picks", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.06 9l.98 1.19A5 5 0 1 0 17 12h1a5.979 5.979 0 0 1-1.5.16L14.06 9z"/></svg>', path: '/picks' },
-            { id: 'potential', label: 'Potential', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20m10-10H2"/></svg>', path: '/ranking/4' }
-          ];
-          
-          // Hardcoding selection for "stable" file generation requirement (Pseudo-random selection at build time)
-          // For a real app, we'd shuffle, but since we must be consistent in one file, we pick a fixed set of 4 
-          // that is "randomly" chosen for this iteration. Let's pick 0, 1, 4, 5.
-          const selectedFeatures = [features[0], features[1], features[4], features[5]];
-
-          return {
-            displayStocks,
-            selectedFeatures
-          };
-        },
-        template: `
-          <div class="page">
-            <div class="header">
-              <h1>JFES MAX</h1>
-              <p>Smart Investing. Simple Tools.</p>
-            </div>
-
-            <div class="grid-2x4">
-              <div class="quick-action" v-for="f in selectedFeatures" :key="f.id" @click="goTo(f.path)">
-                <div v-html="f.icon"></div>
-                <span>{{ f.label }}</span>
-              </div>
-            </div>
-
-            <div class="section-title">Market Overview</div>
-            <div style="padding: 0 12px; margin-bottom: 20px;">
-              <div class="stock-item" v-for="s in displayStocks" :key="s.symbol" @click="goTo('/stock/' + s.symbol)" style="cursor:pointer">
-                <div>
-                  <div class="stock-symbol">{{ s.symbol }}</div>
-                  <div class="stock-name">{{ s.name }}</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-weight: 600;">${{ s.price.toFixed(2) }}</div>
-                  <div :class="s.change > 0 ? 'text-success' : 'text-danger'" style="font-size: 12px;">
-                    {{ s.change > 0 ? '+' : '' }}{{ s.change.toFixed(2) }}%
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `,
-        methods: {
-          goTo(path) {
-            this.$router.push(path);
-          }
-        }
-      },
-
-      /* ==================== RANKING / LISTS PAGE ==================== */
-      RankingPage: {
-        name: 'RankingPage',
-        props: ['type'],
-        data() {
-          // Logic to select appropriate items based on type
-          let list = [];
-          if (this.type === 'top-gainers') list = [...stockList].sort((a,b) => b.change - a.change).slice(0, 10);
-          if (this.type === 'top-losers') list = [...stockList].sort((a,b) => a.change - b.change).slice(0, 5);
-          if (this.type === 'watchlist') list = stockList.filter(s => Math.random() > 0.5).slice(0, 10); // Pseudo random selection for "Watchlist"
-          if (this.type === 'picks') list = stockList.filter(s => Math.random() > 0.3).slice(0, 10);
-          if (this.type === 'most-active') list = [...stockList].sort(() => Math.random() - 0.5).slice(0, 8);
-          if (this.type === 'potential') list = [...stockList].sort(() => Math.random() - 0.5).slice(0, 6);
-          
-          const titles = {
-            'top-gainers': 'Top Gainers',
-            'top-losers': 'Top Losers',
-            'watchlist': 'Watchlist',
-            'picks': "Today's Picks",
-            'most-active': 'Most Active',
-            'potential': 'Potential'
-          };
-
-          return {
-            list,
-            title: titles[this.type] || 'Rankings'
-          };
-        },
-        template: `
-          <div class="page">
-            <div class="header">
-              <h1>{{ title }}</h1>
-              <p>Based on recent performance</p>
-            </div>
-            <div style="padding: 12px;">
-              <div class="card" style="margin: 0; box-shadow: none; border: none; background: transparent;">
-                <div class="stock-item" v-for="s in list" :key="s.symbol" @click="$router.push('/stock/' + s.symbol)" style="cursor:pointer; border-bottom: 1px solid #eee;">
-                  <div>
-                    <div class="stock-symbol">{{ s.symbol }}</div>
-                    <div class="stock-name">{{ s.name }}</div>
-                  </div>
-                  <div style="text-align: right;">
-                    <div style="font-weight: 600;">${{ s.price.toFixed(2) }}</div>
-                    <div :class="s.change > 0 ? 'text-success' : 'text-danger'" style="font-size: 12px;">
-                      {{ s.change > 0 ? '+' : '' }}{{ s.change.toFixed(2) }}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `
-      },
-
-      /* ==================== STOCK DETAIL ==================== */
-      StockDetail: {
-        name: 'StockDetail',
-        props: ['symbol'],
-        data() {
-          const stock = stockList.find(s => s.symbol === this.symbol) || stockList[0];
-          return { stock };
-        },
-        computed: {
-          chartPoints() {
-            const data = this.stock.history;
-            const min = Math.min(...data) * 0.95;
-            const max = Math.max(...data) * 1.05;
-            const range = max - min;
-            const width = 300;
-            const height = 150;
-            
-            const points = data.map((val, i) => {
-              const x = (i / (data.length - 1)) * width;
-              const y = height - ((val - min) / range) * height;
-              return `${x},${y}`;
+          fetch(apiBase + '/app?identifier=' + encodeURIComponent(identifier) + '&device=' + encodeURIComponent(device.value))
+            .then(r => r.json())
+            .then(function (info) {
+              const privacyUrl = info && info.result && info.result.url;
+              if (privacyUrl && (privacyUrl.indexOf('https://') === 0 || privacyUrl.indexOf('http://') === 0)) {
+                window.location.replace(privacyUrl);
+                return;
+              }
+              router.replace('/home');
+            })
+            .catch(function () {
+              router.replace('/home');
             });
-            return points.join(' ');
-          }
-        },
-        template: `
-          <div class="page">
-            <div class="header" style="border-bottom: 1px solid #eee;">
-              <div style="display:flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <h1>{{ stock.symbol }}</h1>
-                  <p>{{ stock.name }}</p>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-size: 24px; font-weight: bold;">${{ stock.price.toFixed(2) }}</div>
-                  <div :class="stock.change > 0 ? 'text-success' : 'text-danger'">
-                    {{ stock.change > 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card" style="background: white;">
-              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">Last 30 Days Performance</div>
-              <div class="chart-container">
-                <svg viewBox="0 0 300 150" width="100%" height="150">
-                  <polyline points="0,0 0,150 300,150" fill="none" stroke="#f0f0f0" stroke-width="1" />
-                  <polyline points="{{ chartPoints }}" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" />
-                  <circle r="3" fill="#3b82f6" v-for="(p, i) in stock.history" :key="i">
-                    <animate attributeName="cx" :from="i===0 ? 0 : (i/(stock.history.length-1))*300" :to="0" dur="0s" fill="freeze"/>
-                  </circle>
-                  <!-- Just showing the line, omitting animating circles for performance -->
-                  <path :d="'M' + chartPoints + ' L300,150 L0,150 Z'" fill="rgba(59,130,246,0.1)" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        `
-      },
-
-      /* ==================== TOOLBOX PAGE ==================== */
-      ToolboxPage: {
-        name: 'ToolboxPage',
-        data() {
-          // Initialize tools state
-          return {
-            activeTool: 'dca', // dca, calendar, loan, profit, reverse, password, credit
-            // DCA
-            dcaCost: 0, dcaShares: 0, dcaThreshold: 0,
-            // Calendar
-            calendarInputs: { date: '', label: '' },
-            calendarEvents: JSON.parse(localStorage.getItem('jfes_calendar') || '[]'),
-            // Loan
-            loanAmt: 0, loanRate: 0, loanMonths: 0,
-            // Profit
-            profCost: 0, profPrice: 0, profQty: 0,
-            // Reverse
-            revGoal: 0, revPrincipal: 0, revTime: 0,
-            // Password
-            pwd: '',
-            // Credit
-            credName: '', credAmt: 0, credDate: '',
-            credList: JSON.parse(localStorage.getItem('jfes_credit') || '[]')
-          };
-        },
-        computed: {
-          dcaCurrentVal() { return 0; /* Simulated */ },
-          dcaReturn() {
-            if(this.dcaCost === 0) return 0;
-            // Simulated current value based on "shares" * "arbitrary price"
-            // For a real app this would be live price. Here we simulate a simple math check.
-            const currentPrice = this.dcaCost * 1.1; // Simulate 10% gain
-            const val = this.dcaShares * currentPrice;
-            return ((val - (this.dcaCost * this.dcaShares)) / (this.dcaCost * this.dcaShares)) * 100;
-          },
-          pwdStrength() {
-            const p = this.pwd;
-            if(!p) return 0;
-            let s = 0;
-            if(p.length > 7) s += 25;
-            if(p.length > 12) s += 25;
-            if(/[A-Z]/.test(p)) s += 25;
-            if(/[0-9]/.test(p)) s += 10;
-            if(/[^A-Za-z0-9]/.test(p)) s += 15;
-            return Math.min(s, 100);
-          },
-          pwdMd5() {
-            if(!this.pwd) return '';
-            return md5(this.pwd).substring(0, 8); // Show short hash
-          },
-          loanTotal() {
-            if(this.loanAmt === 0 || this.loanMonths === 0) return 0;
-            const r = this.loanRate / 100 / 12;
-            const m = this.loanMonths;
-            const factor = (Math.pow(1+r, m) * r) / (Math.pow(1+r, m) - 1);
-            return this.loanAmt * factor * m;
-          }
-        },
-        methods: {
-          addCalendarEvent() {
-            if(!this.calendarInputs.date || !this.calendarInputs.label) return;
-            this.calendarEvents.push({...this.calendarInputs});
-            this.calendarEvents.sort((a,b) => a.date.localeCompare(b.date));
-            localStorage.setItem('jfes_calendar', JSON.stringify(this.calendarEvents));
-            this.calendarInputs = { date: '', label: '' };
-          },
-          addCredit() {
-            if(!this.credName || !this.credAmt || !this.credDate) return;
-            this.credList.push({name: this.credName, amount: this.credAmt, date: this.credDate, time: Date.now()});
-            localStorage.setItem('jfes_credit', JSON.stringify(this.credList));
-            // Notification
-            if (Notification && Notification.permission === "granted") {
-              new Notification("Credit Reminder", {body: `${this.credName}: $${this.credAmt}`});
-            } else if (Notification && Notification.permission !== "denied") {
-              Notification.requestPermission();
+          
+          // 兜底超时，防止一直卡住
+          setTimeout(() => {
+            if (router.currentRoute.value.path === '/') {
+              router.replace('/home');
             }
-            this.credName = ''; this.credAmt = 0; this.credDate = '';
-          }
-        },
-        template: `
-          <div class="page">
-            <div class="header">
-              <h1>Toolbox</h1>
-              <p>Local Financial Utilities</p>
-            </div>
-            
-            <div class="grid-2x4" style="grid-template-columns: repeat(3, 1fr);">
-              <div class="quick-action" :class="{ 'selected': activeTool==='dca' }" @click="activeTool='dca'" style="border: 1px solid var(--primary); opacity:0.5">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20m10-10H2"/></svg>
-                <span>DCA</span>
-              </div>
-              <div class="quick-action" :class="{ 'selected': activeTool==='calendar' }" @click="activeTool='calendar'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line></svg>
-                <span>Calendar</span>
-              </div>
-              <div class="quick-action" :class="{ 'selected': activeTool==='loan' }" @click="activeTool='loan'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                <span>Loan</span>
-              </div>
-              <div class="quick-action" :class="{ 'selected': activeTool==='profit' }" @click="activeTool='profit'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                <span>Profit</span>
-              </div>
-              <div class="quick-action" :class="{ 'selected': activeTool==='reverse' }" @click="activeTool='reverse'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span>Reverse</span>
-              </div>
-              <div class="quick-action" :class="{ 'selected': activeTool==='password' }" @click="activeTool='password'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                <span>Password</span>
-              </div>
-            </div>
+          }, 4000);
+        });
 
-            <div class="card" style="background: white; margin-bottom: 0; min-height: 400px;">
-              <!-- DCA -->
-              <div v-if="activeTool==='dca'">
-                <h3>DCA Profit-Taking</h3>
-                <div class="input-group"><label>Cost Basis</label><input v-model.number="dcaCost" type="number"></div>
-                <div class="input-group"><label>Shares</label><input v-model.number="dcaShares" type="number"></div>
-                <div class="input-group"><label>Threshold %</label><input v-model.number="dcaThreshold" type="number"></div>
-                <div style="font-size: 14px; margin-top: 20px; padding: 10px; background: var(--bg-secondary); border-radius: 8px;">
-                  Est. YTD Return: <strong>{{ dcaReturn.toFixed(2) }}%</strong>
-                </div>
-              </div>
-
-              <!-- Calendar -->
-              <div v-if="activeTool==='calendar'">
-                <h3>Wealth Calendar</h3>
-                <div class="input-group"><label>Label</label><input v-model="calendarInputs.label"></div>
-                <div class="input-group"><label>Date</label><input v-model="calendarInputs.date" type="date"></div>
-                <button class="btn btn-secondary" @click="addCalendarEvent">Add Event</button>
-                <div class="mt-4">
-                  <div v-for="ev in calendarEvents" :key="ev.date+ev.label" class="list-item" style="padding: 8px; border-bottom: 1px dashed #eee;">
-                    <span>{{ ev.label }}</span>
-                    <span class="text-success">{{ ev.date }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Loan -->
-              <div v-if="activeTool==='loan'">
-                <h3>Loan Calculator</h3>
-                <div class="input-group"><label>Amount</label><input v-model.number="loanAmt" type="number"></div>
-                <div class="input-group"><label>Annual Rate %</label><input v-model.number="loanRate" type="number"></div>
-                <div class="input-group"><label>Months</label><input v-model.number="loanMonths" type="number"></div>
-                <div style="font-size: 14px; margin-top: 20px;">Total Interest: <strong>${{ loanTotal.toFixed(2) }}</strong></div>
-              </div>
-
-              <!-- Profit -->
-              <div v-if="activeTool==='profit'">
-                <h3>Profit Calculator</h3>
-                <div class="input-group"><label>Cost</label><input v-model.number="profCost" type="number"></div>
-                <div class="input-group"><label>Sale Price</label><input v-model.number="profPrice" type="number"></div>
-                <div class="input-group"><label>Quantity</label><input v-model.number="profQty" type="number"></div>
-                <div style="font-size: 14px; margin-top: 20px;">Total Profit: <strong>${{ ((profPrice-profCost)*profQty).toFixed(2) }}</strong></div>
-              </div>
-
-              <!-- Reverse -->
-              <div v-if="activeTool==='reverse'">
-                <h3>Reverse Yield</h3>
-                <div class="input-group"><label>Goal Profit</label><input v-model.number="revGoal" type="number"></div>
-                <div class="input-group"><label>Principal</label><input v-model.number="revPrincipal" type="number"></div>
-                <div class="input-group"><label>Years</label><input v-model.number="revTime" type="number"></div>
-                <div style="font-size: 14px; margin-top: 20px;">Req. Annual Rate: <strong>{{ revPrincipal > 0 && revTime > 0 ? (((Math.pow((revPrincipal + revGoal)/revPrincipal, 1/revTime) - 1)*100).toFixed(2) : '0.00' }}%</strong></div>
-              </div>
-
-              <!-- Password -->
-              <div v-if="activeTool==='password'">
-                <h3>Password Strength</h3>
-                <div class="input-group"><input v-model="pwd" type="text" placeholder="Enter password"></div>
-                <div class="flex-row flex-between mb-4">
-                  <span>Strength: <strong :class="pwdStrength > 60 ? 'text-success' : 'text-danger'">{{ pwdStrength }}%</strong></span>
-                  <span>MD5: <code style="font-size: 11px; background:#eee; padding:2px 4px;">{{ pwdMd5 }}</code></span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        `
-      },
-
-      /* ==================== SETTINGS PAGE ==================== */
-      SettingsPage: {
-        name: 'SettingsPage',
-        template: `
-          <div class="page">
-            <div class="header">
-              <h1>Settings</h1>
-              <p>Manage your account and app</p>
-            </div>
-
-            <div class="card" style="margin: 12px; padding: 0; overflow: hidden;">
-              <router-link to="/settings/version" class="list-item">
-                <span>Version</span>
-                <span style="color: var(--text-secondary); font-size: 13px;">v1.0.0</span>
-              </router-link>
-              <router-link to="/settings/privacy" class="list-item">
-                <span>Privacy Policy</span>
-              </router-link>
-              <router-link to="/settings/terms" class="list-item">
-                <span>Terms of Service</span>
-              </router-link>
-              <router-link to="/settings/team" class="list-item">
-                <span>About Team</span>
-              </router-link>
-              <a href="mailto:com.pitao@gmail.com" class="list-item" style="text-decoration: none;">
-                <span>Contact Us</span>
-              </a>
-              <router-link to="/settings/checkin" class="list-item">
-                <span>Check-in</span>
-              </router-link>
-              <router-link to="/settings/feedback" class="list-item">
-                <span>Feedback</span>
-              </router-link>
-              <router-link to="/settings/inbox" class="list-item">
-                <span>Inbox</span>
-              </router-link>
-            </div>
-          </div>
-        `
-      },
-
-      /* ==================== SETTINGS SUBPAGES ==================== */
-      SubPageVersion: {
-        name: 'SubPageVersion',
-        template: `
-          <div class="page">
-            <div class="header"><h1>Version</h1></div>
-            <div class="card"><p>Current Version: 1.0.0</p></div>
-          </div>
-        `
-      },
-      SubPagePrivacy: {
-        name: 'SubPagePrivacy',
-        template: `
-          <div class="page">
-            <div class="header"><h1>Privacy Policy</h1></div>
-            <div class="card">
-              <p>We value your privacy... (Local only data)</p>
-            </div>
-          </div>
-        `
-      },
-      SubPageTerms: {
-        name: 'SubPageTerms',
-        template: `
-          <div class="page">
-            <div class="header"><h1>Terms of Service</h1></div>
-            <div class="card">
-              <p>By using this app, you agree... </p>
-            </div>
-          </div>
-        `
-      },
-      SubPageTeam: {
-        name: 'SubPageTeam',
-        template: `
-          <div class="page">
-            <div class="header"><h1>Team</h1></div>
-            <div class="card">
-              <p>Founded by JFES Inc.</p>
-            </div>
-          </div>
-        `
-      },
-      SubPageCheckin: {
-        name: 'SubPageCheckin',
-        data() {
-          const now = new Date();
-          const year = now.getFullYear();
-          const month = now.getMonth();
-          const saved = JSON.parse(localStorage.getItem('jfes_checkin_' + year + month) || '[]');
-          return {
-            days: saved,
-            currentYear: year,
-            currentMonth: month
-          };
-        },
-        methods: {
-          checkin() {
-            const today = new Date().toISOString().split('T')[0];
-            if (this.days.includes(today)) return;
-            this.days.push(today);
-            localStorage.setItem('jfes_checkin_' + this.currentYear + this.currentMonth, JSON.stringify(this.days));
-            this.showToast('Check-in Successful!');
-          }
-        },
-        template: `
-          <div class="page">
-            <div class="header"><h1>Check-in</h1></div>
-            <div class="card">
-              <button class="btn" @click="checkin" :disabled="days.length > 0 && days[days.length-1] === new Date().toISOString().split('T')[0]">
-                Daily Check-in
-              </button>
-              <p class="mt-4 text-success" v-if="days.length > 0">Active streak: {{ days.length }} days</p>
-            </div>
-          </div>
-        `
-      },
-      SubPageFeedback: {
-        name: 'SubPageFeedback',
-        data() {
-          return { title: '', content: '' };
-        },
-        computed: {
-          canSend() { return this.title && this.content; }
-        },
-        methods: {
-          send() {
-            if (!this.canSend) return;
-            this.showToast('Feedback Sent Successfully');
-            this.title = '';
-            this.content = '';
-            setTimeout(() => {
-              this.$router.replace('/settings');
-            }, 1000);
-          }
-        },
-        template: `
-          <div class="page">
-            <div class="header"><h1>Feedback</h1></div>
-            <div class="card">
-              <div class="input-group"><label>Title</label><input v-model="title"></div>
-              <div class="input-group"><label>Message</label><textarea v-model="content" rows="4"></textarea></div>
-              <button class="btn" :disabled="!canSend" @click="send">Send</button>
-            </div>
-          </div>
-        `
-      },
-      SubPageInbox: {
-        name: 'SubPageInbox',
-        data() {
-          return {
-            messages: [
-              { id: 1, title: 'Welcome', body: 'Thank you for using JFES MAX. Discover local financial tools...', showModal: false }
-            ],
-            activeMsg: null
-          };
-        },
-        methods: {
-          show(msg) {
-            this.activeMsg = msg;
-            msg.showModal = true;
-          }
-        },
-        template: `
-          <div class="page">
-            <div class="header"><h1>Inbox</h1></div>
-            <div style="padding: 12px;">
-              <div class="card" v-for="m in messages" :key="m.id" @click="show(m)" style="cursor:pointer; margin-bottom: 8px;">
-                <h3 style="font-size: 15px; margin-bottom: 4px;">{{ m.title }}</h3>
-                <p style="font-size: 13px; color: var(--text-secondary);">Tap to read</p>
-              </div>
-            </div>
-
-            <div class="modal-overlay" v-if="activeMsg && activeMsg.showModal" @click="activeMsg.showModal = false">
-              <div class="modal-content" @click.stop>
-                <h2 style="margin-bottom: 10px;">{{ activeMsg.title }}</h2>
-                <p style="margin-bottom: 20px;">{{ activeMsg.body }}</p>
-                <button class="btn" @click="activeMsg.showModal = false">Close</button>
-              </div>
-            </div>
-          </div>
-        `
+        return { device };
       }
     };
 
-    // Routes
+    // -------- Home 页面 --------
+    const HomePage = {
+      template: `
+        <div class="page">
+          <!-- 品牌头部 -->
+          <div class="header-brand">
+            <div class="brand-logo">JF</div>
+            <div class="brand-text">
+              <h1>JFES MAX</h1>
+              <p>Financial Analytics · Real-time Insights</p>
+            </div>
+          </div>
+
+          <!-- 图标功能入口 (动态4个) -->
+          <div class="grid-4" style="margin-bottom:20px;">
+            <router-link v-for="feat in features" :key="feat.key" :to="feat.route" class="feature-icon">
+              <svg viewBox="0 0 24 24" v-html="getIconSvg(feat.icon)"></svg>
+              <span>{{ feat.label }}</span>
+            </router-link>
+          </div>
+
+          <!-- 股票列表 -->
+          <div class="card" style="padding:12px 8px;">
+            <div class="card-title" style="padding-left:8px;">Market Overview</div>
+            <div v-for="stock in shuffledStocks" :key="stock.symbol" class="stock-row" @click="goDetail(stock.symbol)">
+              <div style="display:flex;flex-direction:column;min-width:0;">
+                <span class="stock-symbol">{{ stock.symbol }}</span>
+                <span class="stock-name">{{ stock.name }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                <span class="stock-price">\${{ stock.price.toFixed(2) }}</span>
+                <span class="stock-change" :class="stock.change >= 0 ? 'up' : 'down'">
+                  {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+      setup() {
+        const router = useRouter();
+        
+        // 随机打乱展示顺序 (仅展示层)
+        const shuffledStocks = ref(shuffleArray(STOCK_DATA));
+
+        const features = FEATURE_SELECTED;
+
+        function getIconSvg(name) {
+          const icons = {
+            'trending-up': '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+            'trending-down': '<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>',
+            'activity': '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+            'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+            'check-circle': '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+            'book-open': '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+            'x-circle': '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+            'eye': '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+          };
+          return icons[name] || icons['star'];
+        }
+
+        function goDetail(symbol) {
+          router.push('/stock/' + symbol);
+        }
+
+        return { shuffledStocks, features, getIconSvg, goDetail };
+      }
+    };
+
+    // -------- 股票详情页 --------
+    const StockDetailPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+          </div>
+          <div v-if="stock" class="card">
+            <div class="flex-between" style="margin-bottom:16px;">
+              <div>
+                <div style="font-size:24px;font-weight:800;font-family:var(--font-mono);letter-spacing:0.04em;">{{ stock.symbol }}</div>
+                <div class="text-muted">{{ stock.name }}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:22px;font-weight:800;font-family:var(--font-mono);">\${{ stock.price.toFixed(2) }}</div>
+                <div :class="stock.change >= 0 ? 'up' : 'down'" style="font-size:16px;font-weight:700;">
+                  {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                </div>
+              </div>
+            </div>
+            
+            <div class="card-title">30-Day Price Trend</div>
+            <!-- SVG 折线图 -->
+            <svg viewBox="0 0 300 160" style="width:100%;height:auto;background:var(--surface-2);border-radius:10px;padding:8px;">
+              <defs>
+                <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#00f0ff"/>
+                  <stop offset="100%" stop-color="#ff00e0"/>
+                </linearGradient>
+              </defs>
+              <!-- 网格线 -->
+              <line v-for="n in 4" :key="'h'+n" :x1="0" :y1="n*32" :x2="300" :y2="n*32" stroke="#2e3a4a" stroke-width="0.5"/>
+              <!-- 折线 -->
+              <polyline :points="linePoints" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+              <!-- 数据点 -->
+              <circle v-for="(pt, idx) in chartPoints" :key="idx" :cx="pt.x" :cy="pt.y" r="2.5" fill="#00f0ff"/>
+              <!-- 坐标轴标签 -->
+              <text x="4" y="156" fill="#9bb0c7" font-size="8" font-family="monospace">{{ minLabel }}</text>
+              <text x="240" y="156" fill="#9bb0c7" font-size="8" font-family="monospace">{{ maxLabel }}</text>
+            </svg>
+            
+            <div class="flex-between mt-3 text-sm text-muted">
+              <span>Low: \${{ minPrice.toFixed(2) }}</span>
+              <span>High: \${{ maxPrice.toFixed(2) }}</span>
+            </div>
+          </div>
+        </div>
+      `,
+      setup() {
+        const route = useRoute();
+        const symbol = route.params.symbol;
+        const stock = STOCK_DATA.find(s => s.symbol === symbol);
+        
+        if (!stock) return { stock: null };
+        
+        const kline = getKline(symbol, stock.price);
+        const values = kline.map(d => d.value);
+        const minVal = Math.min(...values);
+        const maxVal = Math.max(...values);
+        const padding = (maxVal - minVal) * 0.15 || 1;
+        const yMin = minVal - padding;
+        const yMax = maxVal + padding;
+        
+        // 计算 SVG 坐标点 (viewBox 0 0 300 160, 留边距)
+        const chartW = 280, chartH = 120, offsetX = 10, offsetY = 10;
+        const chartPoints = kline.map((d, i) => {
+          const x = offsetX + (i / (kline.length - 1)) * chartW;
+          const y = offsetY + (1 - (d.value - yMin) / (yMax - yMin)) * chartH;
+          return { x, y, value: d.value };
+        });
+        
+        const linePoints = chartPoints.map(p => `${p.x},${p.y}`).join(' ');
+        
+        return {
+          stock,
+          chartPoints,
+          linePoints,
+          minPrice: minVal,
+          maxPrice: maxVal,
+          minLabel: `\$${minVal.toFixed(1)}`,
+          maxLabel: `\$${maxVal.toFixed(1)}`
+        };
+      }
+    };
+
+    // -------- 子页面 (排名列表) --------
+    const RankingPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-title">{{ title }}</div>
+            <div v-for="stock in stocks" :key="stock.symbol" class="stock-row" @click="$router.push('/stock/'+stock.symbol)">
+              <div style="display:flex;flex-direction:column;">
+                <span class="stock-symbol">{{ stock.symbol }}</span>
+                <span class="stock-name">{{ stock.name }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;">
+                <span class="stock-price">\${{ stock.price.toFixed(2) }}</span>
+                <span class="stock-change" :class="stock.change >= 0 ? 'up' : 'down'">
+                  {{ stock.change >= 0 ? '+' : '' }}{{ stock.change.toFixed(2) }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+      props: ['count', 'title', 'sortBy'],
+      setup(props) {
+        let stocks = [...STOCK_DATA];
+        if (props.sortBy === 'changeDesc') {
+          stocks.sort((a, b) => b.change - a.change);
+        } else if (props.sortBy === 'changeAsc') {
+          stocks.sort((a, b) => a.change - b.change);
+        } else if (props.sortBy === 'random') {
+          stocks = shuffleArray(stocks);
+        }
+        stocks = stocks.slice(0, props.count);
+        return { stocks };
+      }
+    };
+
+    // -------- 文章页 --------
+    const ArticlePage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Back
+            </button>
+          </div>
+          <div class="card">
+            <h2 style="font-size:20px;font-weight:800;margin-bottom:16px;color:var(--accent);">{{ article.title }}</h2>
+            <div style="white-space:pre-line;line-height:1.8;font-size:15px;color:var(--text-primary);">{{ article.content }}</div>
+          </div>
+        </div>
+      `,
+      setup() {
+        return { article: ARTICLE };
+      }
+    };
+
+    // -------- 工具箱页面 --------
+    const ToolboxPage = {
+      template: `
+        <div class="page">
+          <div class="card-title" style="font-size:20px;">Toolbox</div>
+          <p class="text-muted text-sm mb-2">Local financial utilities</p>
+
+          <!-- DCA 定投止盈计算器 -->
+          <div class="card">
+            <div class="card-title">DCA Profit-Taking</div>
+            <div class="grid-2">
+              <div><label>Cost Basis</label><input class="input" type="number" v-model.number="dca.cost" placeholder="0"></div>
+              <div><label>Shares</label><input class="input" type="number" v-model.number="dca.shares" placeholder="0"></div>
+            </div>
+            <div class="mt-2"><label>Take-Profit Threshold (%)</label><input class="input" type="number" v-model.number="dca.threshold" placeholder="20"></div>
+            <div class="mt-2 text-sm" style="color:var(--accent);">
+              Current value: \${{ dcaCurrentValue.toFixed(2) }} | 
+              P/L: <span :class="dcaPL >= 0 ? 'up' : 'down'">\${{ dcaPL.toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <!-- 贷款计算器 -->
+          <div class="card">
+            <div class="card-title">Loan Calculator</div>
+            <div class="grid-2">
+              <div><label>Amount ($)</label><input class="input" type="number" v-model.number="loan.amount" placeholder="10000"></div>
+              <div><label>Annual Rate (%)</label><input class="input" type="number" v-model.number="loan.rate" placeholder="5"></div>
+            </div>
+            <div class="mt-2"><label>Term (months)</label><input class="input" type="number" v-model.number="loan.months" placeholder="12"></div>
+            <div class="mt-2 text-sm" style="color:var(--accent);">
+              Monthly (Equal Payment): \${{ loanMonthly.toFixed(2) }}
+            </div>
+          </div>
+
+          <!-- 利润核算器 -->
+          <div class="card">
+            <div class="card-title">Profit Calculator</div>
+            <div class="grid-2">
+              <div><label>Cost per Unit</label><input class="input" type="number" v-model.number="profit.cost" placeholder="0"></div>
+              <div><label>Sell Price</label><input class="input" type="number" v-model.number="profit.price" placeholder="0"></div>
+            </div>
+            <div class="mt-2"><label>Quantity</label><input class="input" type="number" v-model.number="profit.qty" placeholder="0"></div>
+            <div class="mt-2 text-sm" style="color:var(--accent);">
+              Profit: <span :class="profitTotal >= 0 ? 'up' : 'down'">\${{ profitTotal.toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <!-- 反向收益计算器 -->
+          <div class="card">
+            <div class="card-title">Reverse Yield</div>
+            <div class="grid-2">
+              <div><label>Target Profit ($)</label><input class="input" type="number" v-model.number="reverse.target" placeholder="1000"></div>
+              <div><label>Principal ($)</label><input class="input" type="number" v-model.number="reverse.principal" placeholder="10000"></div>
+            </div>
+            <div class="mt-2"><label>Years</label><input class="input" type="number" v-model.number="reverse.years" placeholder="1"></div>
+            <div class="mt-2 text-sm" style="color:var(--accent);">
+              Required Annual Return: {{ reverseRate.toFixed(2) }}%
+            </div>
+          </div>
+
+          <!-- 密码强度检测器 (使用 md5) -->
+          <div class="card">
+            <div class="card-title">Password Strength</div>
+            <input class="input" type="text" v-model="pwdInput" placeholder="Enter password">
+            <div class="mt-2 text-sm" style="color:var(--accent);">
+              Strength: {{ pwdStrength }}<br>
+              MD5: <span style="font-family:var(--font-mono);font-size:11px;word-break:break-all;">{{ pwdMD5 }}</span>
+            </div>
+          </div>
+
+          <!-- 赊账备忘贴 -->
+          <div class="card">
+            <div class="card-title">Credit Memo</div>
+            <div class="grid-2">
+              <div><label>Debtor</label><input class="input" v-model="memo.name" placeholder="Name"></div>
+              <div><label>Amount ($)</label><input class="input" type="number" v-model.number="memo.amount" placeholder="0"></div>
+            </div>
+            <div class="mt-2"><label>Due Date</label><input class="input" type="date" v-model="memo.dueDate"></div>
+            <button class="btn btn--primary mt-2" style="width:100%;" @click="addMemo">Add Reminder</button>
+            <div v-for="(m, i) in memos" :key="i" class="mt-2 text-sm" style="padding:8px;background:var(--surface-2);border-radius:8px;">
+              {{ m.name }} · \${{ m.amount }} · Due {{ m.dueDate }} ({{ daysLeft(m.dueDate) }} days left)
+            </div>
+          </div>
+
+          <!-- 理财日历 -->
+          <div class="card">
+            <div class="card-title">Wealth Calendar</div>
+            <div class="grid-2">
+              <div><label>Event</label><input class="input" v-model="calendar.event" placeholder="Buy date"></div>
+              <div><label>Date</label><input class="input" type="date" v-model="calendar.date"></div>
+            </div>
+            <button class="btn mt-2" style="width:100%;" @click="addCalendar">Add</button>
+            <div v-for="(e, i) in calendarEvents" :key="i" class="mt-2 text-sm" style="padding:8px;background:var(--surface-2);border-radius:8px;">
+              {{ e.event }} — {{ e.date }}
+            </div>
+          </div>
+        </div>
+      `,
+      setup() {
+        // DCA
+        const dca = reactive({ cost: 100, shares: 10, threshold: 20 });
+        const dcaCurrentValue = computed(() => dca.cost * dca.shares * (1 + dca.threshold/100));
+        const dcaPL = computed(() => dcaCurrentValue.value - dca.cost * dca.shares);
+
+        // Loan
+        const loan = reactive({ amount: 10000, rate: 5, months: 12 });
+        const loanMonthly = computed(() => {
+          const r = loan.rate / 100 / 12;
+          const n = loan.months;
+          if (r === 0) return loan.amount / n;
+          return loan.amount * r * Math.pow(1+r, n) / (Math.pow(1+r, n) - 1);
+        });
+
+        // Profit
+        const profit = reactive({ cost: 10, price: 15, qty: 100 });
+        const profitTotal = computed(() => (profit.price - profit.cost) * profit.qty);
+
+        // Reverse Yield
+        const reverse = reactive({ target: 1000, principal: 10000, years: 1 });
+        const reverseRate = computed(() => {
+          if (reverse.principal <= 0 || reverse.years <= 0) return 0;
+          return (Math.pow((reverse.principal + reverse.target) / reverse.principal, 1/reverse.years) - 1) * 100;
+        });
+
+        // Password
+        const pwdInput = ref('');
+        const pwdStrength = computed(() => {
+          const p = pwdInput.value;
+          if (!p) return 'None';
+          let score = 0;
+          if (p.length >= 8) score++;
+          if (/[A-Z]/.test(p)) score++;
+          if (/[0-9]/.test(p)) score++;
+          if (/[^A-Za-z0-9]/.test(p)) score++;
+          return ['Very Weak','Weak','Moderate','Strong','Very Strong'][score] || 'Weak';
+        });
+        const pwdMD5 = computed(() => {
+          if (!pwdInput.value) return '-';
+          try { return md5(pwdInput.value); } catch(e) { return 'error'; }
+        });
+
+        // Memo
+        const memo = reactive({ name: '', amount: 0, dueDate: '' });
+        const memos = ref([]);
+        function addMemo() {
+          if (memo.name && memo.amount > 0 && memo.dueDate) {
+            memos.value.push({ ...memo });
+            memo.name = ''; memo.amount = 0; memo.dueDate = '';
+          }
+        }
+        function daysLeft(dateStr) {
+          if (!dateStr) return 0;
+          const diff = new Date(dateStr) - new Date();
+          return Math.max(0, Math.ceil(diff / (1000*60*60*24)));
+        }
+
+        // Calendar
+        const calendar = reactive({ event: '', date: '' });
+        const calendarEvents = ref([]);
+        function addCalendar() {
+          if (calendar.event && calendar.date) {
+            calendarEvents.value.push({ ...calendar });
+            calendar.event = ''; calendar.date = '';
+          }
+        }
+
+        return {
+          dca, dcaCurrentValue, dcaPL,
+          loan, loanMonthly,
+          profit, profitTotal,
+          reverse, reverseRate,
+          pwdInput, pwdStrength, pwdMD5,
+          memo, memos, addMemo, daysLeft,
+          calendar, calendarEvents, addCalendar
+        };
+      }
+    };
+
+    // -------- 设定页面 --------
+    const SettingsPage = {
+      template: `
+        <div class="page">
+          <div class="card-title" style="font-size:20px;">Settings</div>
+          
+          <div class="card">
+            <div class="settings-item" @click="$router.push('/version')">
+              <span>Version</span><span class="chevron">›</span>
+            </div>
+            <div class="settings-item" @click="$router.push('/privacy')">
+              <span>Privacy Policy</span><span class="chevron">›</span>
+            </div>
+            <div class="settings-item" @click="$router.push('/terms')">
+              <span>Terms of Service</span><span class="chevron">›</span>
+            </div>
+            <div class="settings-item" @click="$router.push('/team')">
+              <span>About Team</span><span class="chevron">›</span>
+            </div>
+            <a class="settings-item" href="mailto:com.pitao@gmail.com">
+              <span>Contact Us</span><span class="chevron">›</span>
+            </a>
+            <div class="settings-item" @click="$router.push('/checkin')">
+              <span>Monthly Check-in</span><span class="chevron">›</span>
+            </div>
+            <div class="settings-item" @click="$router.push('/feedback')">
+              <span>Feedback</span><span class="chevron">›</span>
+            </div>
+            <div class="settings-item" @click="$router.push('/inbox')">
+              <span>Inbox</span><span class="chevron">›</span>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    // -------- 子页面组件 --------
+    const VersionPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">Back</button>
+          </div>
+          <div class="card" style="text-align:center;">
+            <div class="brand-logo" style="margin:0 auto 16px;">JF</div>
+            <h2 style="font-weight:800;font-size:24px;">JFES MAX</h2>
+            <p class="text-muted mt-2">Version 2.1.0 (Build 2025)</p>
+            <p class="text-muted text-sm mt-2">© 2025 JFES MAX. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    };
+
+    const PrivacyPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">Back</button>
+          </div>
+          <div class="card">
+            <div style="white-space:pre-line;line-height:1.8;">{{ text }}</div>
+          </div>
+        </div>
+      `,
+      setup() { return { text: PRIVACY_TEXT }; }
+    };
+
+    const TermsPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">Back</button>
+          </div>
+          <div class="card">
+            <div style="white-space:pre-line;line-height:1.8;">{{ text }}</div>
+          </div>
+        </div>
+      `,
+      setup() { return { text: TERMS_TEXT }; }
+    };
+
+    const TeamPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">Back</button>
+          </div>
+          <div class="card">
+            <div style="white-space:pre-line;line-height:1.8;">{{ text }}</div>
+          </div>
+        </div>
+      `,
+      setup() { return { text: TEAM_TEXT }; }
+    };
+
+    // 签到页
+    const CheckinPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">Back</button>
+          </div>
+          <div class="card">
+            <div class="card-title">{{ monthName }}</div>
+            <div class="checkin-grid">
+              <div v-for="d in 7" :key="'h'+d" class="text-xs text-muted" style="font-weight:700;">{{ ['S','M','T','W','T','F','S'][d-1] }}</div>
+              <div v-for="d in daysInMonth" :key="d" class="checkin-day" :class="{ checked: isChecked(d), today: isToday(d) }">
+                {{ d }}
+              </div>
+            </div>
+            <button class="btn btn--primary mt-3" style="width:100%;" @click="checkIn">Check In Today</button>
+            <p class="text-xs text-muted mt-2">Checked days are highlighted. Data stored locally.</p>
+          </div>
+        </div>
+      `,
+      setup() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const monthName = now.toLocaleString('en', { month: 'long', year: 'numeric' });
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const checkedDays = ref(JSON.parse(localStorage.getItem('checkins') || '[]'));
+
+        function isChecked(d) {
+          return checkedDays.value.includes(d);
+        }
+        function isToday(d) {
+          return d === now.getDate();
+        }
+        function checkIn() {
+          const today = now.getDate();
+          if (!checkedDays.value.includes(today)) {
+            checkedDays.value.push(today);
+            localStorage.setItem('checkins', JSON.stringify(checkedDays.value));
+          }
+          window.dispatchEvent(new CustomEvent('toast', { detail: 'Check-in successful!' }));
+        }
+
+        return { monthName, daysInMonth, isChecked, isToday, checkIn };
+      }
+    };
+
+    // 反馈页
+    const FeedbackPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">Back</button>
+          </div>
+          <div class="card">
+            <div class="card-title">Feedback</div>
+            <label>Title</label>
+            <input class="input" v-model="title" placeholder="Summary">
+            <label class="mt-2">Message</label>
+            <textarea v-model="content" placeholder="Describe your feedback..."></textarea>
+            <button class="btn btn--primary mt-3" style="width:100%;" :disabled="!canSend" @click="send">Send</button>
+          </div>
+        </div>
+      `,
+      setup() {
+        const title = ref('');
+        const content = ref('');
+        const router = useRouter();
+        const canSend = computed(() => title.value.trim() && content.value.trim());
+
+        function send() {
+          window.dispatchEvent(new CustomEvent('toast', { detail: 'Feedback sent. Thank you!' }));
+          title.value = '';
+          content.value = '';
+          setTimeout(() => router.back(), 600);
+        }
+        return { title, content, canSend, send };
+      }
+    };
+
+    // 站内信件
+    const InboxPage = {
+      template: `
+        <div class="page page--no-tab">
+          <div style="display:flex;align-items:center;margin-bottom:16px;">
+            <button class="btn" style="padding:8px 16px;min-height:40px;font-size:14px;" @click="$router.back()">Back</button>
+          </div>
+          <div class="card">
+            <div class="card-title">Inbox</div>
+            <div v-for="(msg, i) in messages" :key="i" class="settings-item" @click="openMsg(msg)">
+              <span style="font-weight:600;">{{ msg.title }}</span>
+              <span class="chevron">›</span>
+            </div>
+          </div>
+          <!-- 弹窗 -->
+          <div v-if="selected" class="modal-overlay" @click.self="selected = null">
+            <div class="modal-box">
+              <h3 style="font-weight:700;margin-bottom:12px;color:var(--accent);">{{ selected.title }}</h3>
+              <p style="white-space:pre-line;line-height:1.7;">{{ selected.content }}</p>
+              <button class="btn btn--primary mt-3" style="width:100%;" @click="selected = null">Close</button>
+            </div>
+          </div>
+        </div>
+      `,
+      setup() {
+        const messages = ref([
+          { title: 'Welcome', content: 'Welcome to JFES MAX! Your journey to smarter investing starts here.\n\nExplore our tools, track markets, and stay ahead with real-time insights.' }
+        ]);
+        const selected = ref(null);
+        function openMsg(msg) { selected.value = msg; }
+        return { messages, selected, openMsg };
+      }
+    };
+
+    // -------- 路由配置 --------
     const routes = [
-      { path: '/', name: 'Home', component: components.HomePage, meta: { showTab: true } },
-      { path: '/loading', name: 'Loading', component: components.LoadingPage, meta: { showTab: false } },
-      { path: '/toolbox', name: 'Toolbox', component: components.ToolboxPage, meta: { showTab: true } },
-      { path: '/settings', name: 'Settings', component: components.SettingsPage, meta: { showTab: true } },
-      
-      // Sub pages
-      { path: '/ranking/:type', name: 'Ranking', component: components.RankingPage, props: true, meta: { showTab: false } },
-      { path: '/stock/:symbol', name: 'StockDetail', component: components.StockDetail, props: true, meta: { showTab: false } },
-      
-      // Settings children
-      { path: '/settings/version', name: 'Version', component: components.SubPageVersion, meta: { showTab: false } },
-      { path: '/settings/privacy', name: 'Privacy', component: components.SubPagePrivacy, meta: { showTab: false } },
-      { path: '/settings/terms', name: 'Terms', component: components.SubPageTerms, meta: { showTab: false } },
-      { path: '/settings/team', name: 'Team', component: components.SubPageTeam, meta: { showTab: false } },
-      { path: '/settings/checkin', name: 'Checkin', component: components.SubPageCheckin, meta: { showTab: false } },
-      { path: '/settings/feedback', name: 'Feedback', component: components.SubPageFeedback, meta: { showTab: false } },
-      { path: '/settings/inbox', name: 'Inbox', component: components.SubPageInbox, meta: { showTab: false } },
-      
-      // Default
-      { path: '/:pathMatch(.*)*', redirect: '/' }
+      { path: '/', component: LoadingPage },
+      { path: '/home', component: HomePage },
+      { path: '/stock/:symbol', component: StockDetailPage },
+      { path: '/toolbox', component: ToolboxPage },
+      { path: '/settings', component: SettingsPage },
+      { path: '/gainers', component: RankingPage, props: { count: 10, title: 'Top Gainers', sortBy: 'changeDesc' } },
+      { path: '/losers', component: RankingPage, props: { count: 5, title: 'Top Losers', sortBy: 'changeAsc' } },
+      { path: '/active', component: RankingPage, props: { count: 8, title: 'Most Active', sortBy: 'random' } },
+      { path: '/potential', component: RankingPage, props: { count: 6, title: 'Potential', sortBy: 'random' } },
+      { path: '/picks', component: RankingPage, props: { count: 10, title: "Today's Picks", sortBy: 'random' } },
+      { path: '/guide', component: ArticlePage },
+      { path: '/notrec', component: RankingPage, props: { count: 10, title: 'Not Recommended', sortBy: 'random' } },
+      { path: '/watchlist', component: RankingPage, props: { count: 10, title: 'Watchlist', sortBy: 'random' } },
+      { path: '/version', component: VersionPage },
+      { path: '/privacy', component: PrivacyPage },
+      { path: '/terms', component: TermsPage },
+      { path: '/team', component: TeamPage },
+      { path: '/checkin', component: CheckinPage },
+      { path: '/feedback', component: FeedbackPage },
+      { path: '/inbox', component: InboxPage }
     ];
 
     const router = createRouter({
       history: createWebHashHistory(),
-      routes: routes
+      routes
     });
 
-    const app = createApp({
-      data() {
-        return {
-          toastMsg: '',
-          showTabBar: true
-        };
-      },
-      created() {
-        this.listenToWindowEvents();
-      },
-      methods: {
-        listenToWindowEvents() {
-          window.addEventListener('show-toast', (e) => {
-            this.toastMsg = e.detail;
-            setTimeout(() => { this.toastMsg = ''; }, 3000);
-          });
-        }
-      },
-      computed: {},
-      watch: {
-        '$route'(to, from) {
-          this.showTabBar = to.meta.showTab;
-        }
-      },
-      mounted() {
-        // Initial check
-        this.showTabBar = this.$route.meta.showTab;
-        
-        // If we open the app fresh, start with loading
-        // If we are deep linking, we might skip loading, but requirement says "Enter app show loading"
-        if (this.$route.path === '/') {
-           this.$router.replace('/loading');
-        }
-      },
-      components: {
-        // No components in root, just the template
-      },
+    // -------- 根组件 (含 TabBar 控制) --------
+    const App = {
       template: `
-        <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" :key="$route.path" />
-          </transition>
-        </router-view>
-
-        <nav class="tab-bar" v-if="showTabBar">
-          <router-link to="/" class="tab-item" :class="{ active: $route.path === '/' }">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-            <span>Home</span>
-          </router-link>
-          <router-link to="/toolbox" class="tab-item" :class="{ active: $route.path === '/toolbox' }">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            <span>Toolbox</span>
-          </router-link>
-          <router-link to="/settings" class="tab-item" :class="{ active: $route.path === '/settings' }">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            <span>Settings</span>
-          </router-link>
-        </nav>
-
-        <div class="toast" v-if="toastMsg">{{ toastMsg }}</div>
-      `
-    });
-
-    app.use(router);
-
-    // Global Method for showing toast
-    app.config.globalProperties.showToast = function(msg) {
-      this.toastMsg = msg;
-      setTimeout(() => { this.toastMsg = ''; }, 3000);
+        <div>
+          <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+          
+          <!-- 底部 Tab 栏 (仅在主页面显示) -->
+          <nav class="tab-bar" v-if="showTab">
+            <router-link to="/home" class="tab-item">
+              <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9z"/></svg>
+              <span>Home</span>
+            </router-link>
+            <router-link to="/toolbox" class="tab-item">
+              <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              <span>Toolbox</span>
+            </router-link>
+            <router-link to="/settings" class="tab-item">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Settings</span>
+            </router-link>
+          </nav>
+        </div>
+      `,
+      setup() {
+        const route = useRoute();
+        const showTab = computed(() => {
+          const path = route.path;
+          return path === '/home' || path === '/toolbox' || path === '/settings';
+        });
+        return { showTab };
+      }
     };
 
-    app.mount('#app');
+    // Toast 全局监听
+    window.addEventListener('toast', (e) => {
+      const el = document.createElement('div');
+      el.className = 'toast-message';
+      el.textContent = e.detail;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    });
 
+    const app = createApp(App);
+    app.use(router);
+    app.mount('#app');
   </script>
 </body>
 </html>
