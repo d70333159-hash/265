@@ -1010,8 +1010,8 @@
                             
                             <div class="stat-card mt-4" :style="{background: dcaResults.isTargetMet ? '#E8F5E9' : '#FFF3E0', color: dcaResults.isTargetMet ? 'var(--success)' : 'var(--warning)'}">
                                 <div class="stat-value">{{ dcaResults.isTargetMet ? 'Target Reached' : 'Accumulating' }}</div>
-                                <div class="stat-label">Current Value: ${{ dcaResults.currentVal.toFixed(2) }}</div>
-                                <div class="stat-label">Profit: ${{ dcaResults.profit.toFixed(2) }}</div>
+                                <div class="stat-label">Current Value: {{ dcaResults.currentVal.toFixed(2) }}</div>
+                                <div class="stat-label">Profit: {{ dcaResults.profit.toFixed(2) }}</div>
                             </div>
                         </div>
 
@@ -1026,16 +1026,16 @@
                             <input type="number" class="input" v-model="loan.years">
                             
                             <div class="stat-card mt-4">
-                                <div class="stat-value">${{ loanResults.monthly.toFixed(2) }}</div>
+                                <div class="stat-value">{{ loanResults.monthly.toFixed(2) }}</div>
                                 <div class="stat-label">Monthly Payment</div>
                             </div>
                             <div style="display:flex; gap:8px;">
                                 <div class="stat-card flex-1" style="background:#F5F5F5; color:var(--on-surface-variant);">
-                                    <div class="stat-value">${{ loanResults.interest.toFixed(2) }}</div>
+                                    <div class="stat-value">{{ loanResults.interest.toFixed(2) }}</div>
                                     <div class="stat-label">Total Interest</div>
                                 </div>
                                 <div class="stat-card flex-1" style="background:#F5F5F5; color:var(--on-surface-variant);">
-                                    <div class="stat-value">${{ loanResults.total.toFixed(2) }}</div>
+                                    <div class="stat-value">{{ loanResults.total.toFixed(2) }}</div>
                                     <div class="stat-label">Total Paid</div>
                                 </div>
                             </div>
@@ -1052,11 +1052,11 @@
                             <input type="number" class="input" v-model="profit.sales">
                             
                             <div class="stat-card mt-4">
-                                <div class="stat-value">${{ profitResults.daily.toFixed(2) }}</div>
+                                <div class="stat-value">{{ profitResults.daily.toFixed(2) }}</div>
                                 <div class="stat-label">Daily Profit</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-value">${{ profitResults.monthly.toFixed(2) }}</div>
+                                <div class="stat-value">{{ profitResults.monthly.toFixed(2) }}</div>
                                 <div class="stat-label">Estimated Monthly</div>
                             </div>
                         </div>
@@ -1105,7 +1105,7 @@
                             <div v-for="m in memos" :key="m.id" class="card" style="margin-top:16px; padding:12px;">
                                 <div style="display:flex; justify-content:space-between;">
                                     <strong>{{ m.object }}</strong>
-                                    <span class="down">${{ m.amount }}</span>
+                                    <span class="down">{{ m.amount }}</span>
                                 </div>
                                 <small style="color:var(--neutral)">Due: {{ m.date || 'Not set' }}</small>
                             </div>
